@@ -23,6 +23,36 @@ public class QuadTreeCompressor {
     }
 
     // Method compress
+    public Quadrant compress(BufferedImage image, int x, int y, int width, int height) {
+        if (width <= minBlockSize || height <= minBlockSize) {
+            Quadrant leaf = new Quadrant(x, y, width, height);
+            leaf.setColor(averageColor(image, x, y, width, height));
+            leaf.setLeaf(true);
+            return leaf;
+        }
+
+        double error = ErrorMeasurement(image, x, y, width, height);
+        if (error < threshold) {
+            Quadrant leaf = new Quadrant(x, y, width, height);
+            leaf.setColor(averageColor(image, x, y, width, height));
+            leaf.setLeaf(true);
+            return leaf;
+        }
+
+        int halfWidth = width / 2;
+        int halfHeight = height / 2;
+
+        Quadrant[] children = new Quadrant[4];
+        children[0] = compress(image, x, y, halfWidth, halfHeight); // Top-left
+        children[1] = compress(image, x + halfWidth, y, halfWidth, halfHeight); // Top-right
+        children[2] = compress(image, x, y + halfHeight, halfWidth, halfHeight); // Bottom-left
+        children[3] = compress(image, x + halfWidth, y + halfHeight, halfWidth, halfHeight); // Bottom-right
+
+        Quadrant parent = new Quadrant(x, y, width, height);
+        parent.setChildren(children);
+        parent.setLeaf(false);
+        return parent;
+    }
 
     // Method reconstruct gambar hasil compress
 
