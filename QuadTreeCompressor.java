@@ -27,6 +27,22 @@ public class QuadTreeCompressor {
         this.outputPath = outputPath;
     }
 
+    public void startCompress(){
+        try{
+            BufferedImage originalImage = ImageIO.read(new File(inputPath));
+            int width = originalImage.getWidth();
+            int height = originalImage.getHeight();
+
+            Quadrant compressed = compress(originalImage, 0, 0, width, height);
+            BufferedImage compressedImage = imageReconstruction(compressed);
+            displayImage(compressedImage);
+
+        } catch (IOException e) {
+            System.err.println("Error loading the image: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     // Method compress
     public Quadrant compress(BufferedImage image, int x, int y, int width, int height) {
         if (width <= minBlockSize || height <= minBlockSize) {
