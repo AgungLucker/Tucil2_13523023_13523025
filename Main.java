@@ -1,18 +1,30 @@
+import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Enter the input image path:");
-        String inputPath = System.console().readLine();
-        System.out.println("Enter the error method (0 for MSE, 1 for MAE):");
-        int errorMethod = Integer.parseInt(System.console().readLine());
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the input image path (absolute path):");
+        String inputPath = scanner.nextLine();
+        System.out.println("Enter the error method:");
+        System.out.println("0 Variance");
+        System.out.println("1 Mean Absolute Deviation");
+        System.out.println("2 Max Pixel Difference");
+        System.out.println("3 Entropy");
+        System.out.println("4 SSIM");
+        int errorMethod = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter the threshold for compression:");
-        double threshold = Double.parseDouble(System.console().readLine());
+        double threshold = Double.parseDouble(scanner.nextLine());
         System.out.println("Enter the minimum block size:");
-        int minBlockSize = Integer.parseInt(System.console().readLine());
+        int minBlockSize = Integer.parseInt(scanner.nextLine());
         System.out.println("Enter the target compression ratio:");
-        double targetCompression = Double.parseDouble(System.console().readLine());
-        System.out.println("Enter the output image path:");
-        String outputPath = System.console().readLine();
+        double targetCompression = Double.parseDouble(scanner.nextLine());
+        System.out.println("Enter the output image path (absolute path):");
+        String outputPath = scanner.nextLine();
 
-        new QuadTreeCompressor(inputPath, errorMethod, threshold, minBlockSize, targetCompression, outputPath);
+
+
+        QuadTreeCompressor compressor = new QuadTreeCompressor(inputPath, errorMethod, threshold, minBlockSize, targetCompression, outputPath);
+        compressor.startCompress(); 
+        scanner.close();
     }
 }
