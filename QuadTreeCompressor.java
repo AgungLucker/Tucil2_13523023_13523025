@@ -1,5 +1,10 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
 
 
 
@@ -55,6 +60,28 @@ public class QuadTreeCompressor {
     }
 
     // Method reconstruct gambar hasil compress
+    public BufferedImage imageReconstruction(Quadrant root) {
+        BufferedImage reconstructedImage = new BufferedImage(root.getWidth(), root.getHeight(), BufferedImage.TYPE_INT_RGB);
+        if(root.isLeaf()){
+            for (int i= root.getY();i<root.getY()+root.getHeight();i++){
+                for (int j=root.getX();j<root.getX()+root.getWidth();j++){
+                    reconstructedImage.setRGB(j,i,root.getColor().getRGB());
+                }
+            }
+        }else{
+            for (Quadrant child:root.getChildren()){
+                for (int i= child.getY();i<child.getY()+child.getHeight();i++){
+                    for (int j=child.getX();j<child.getX()+child.getWidth();j++){
+                        reconstructedImage.setRGB(j,i,child.getColor().getRGB());
+                    }
+                }
+            }
+
+        }
+        return reconstructedImage;
+    }
+
+    
 
     // Method error Measurement
     private double ErrorMeasurement(BufferedImage image, int x, int y, int width, int height) {

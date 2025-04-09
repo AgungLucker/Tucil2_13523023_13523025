@@ -13,6 +13,6 @@ public class Main {
         System.out.println("Enter the output image path:");
         String outputPath = System.console().readLine();
 
-        // new QuadTreeCompressor(inputPath, errorMethod, threshold, minBlockSize, targetCompression, outputPath);
+        new QuadTreeCompressor(inputPath, errorMethod, threshold, minBlockSize, targetCompression, outputPath);
     }
 }
