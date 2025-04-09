@@ -92,12 +92,21 @@ public class QuadTreeCompressor {
                     }
                 }
             }
-
         }
         return reconstructedImage;
     }
 
-    
+    // Method to display image
+    public void displayImage (BufferedImage image){
+        System.out.println("Displayin image...");
+        JFrame frame = new JFrame();
+        JLabel label = new JLabel();
+        frame.setSize(image.getWidth(), image.getHeight());
+        label.setIcon(new ImageIcon(image));
+        frame.getContentPane().add(label, BorderLayout.CENTER);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
 
     // Method error Measurement
     private double ErrorMeasurement(BufferedImage image, int x, int y, int width, int height) {
