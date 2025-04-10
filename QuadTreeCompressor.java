@@ -33,7 +33,7 @@ public class QuadTreeCompressor {
         try{
             // Load gambar
             BufferedImage originalImage = ImageIO.read(new File(inputPath));
-            File originaFile = new File(inputPath);
+            File originalFile = new File(inputPath);
             System.out.println("Loaded image: " + inputPath);
             
             
@@ -47,16 +47,13 @@ public class QuadTreeCompressor {
             long selesai = System.currentTimeMillis();
 
             // Menyimpan ke memori (bukan ke file fisik)
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(compressedImage, "jpg", baos);  // bisa ganti "jpg" ke "png" atau lainnya
-            baos.flush();
-
-            byte[] imageBytes = baos.toByteArray();
-            baos.close();
-
+            File compressedFile = new File(outputPath);
+            ImageIO.write(compressedImage, "png", compressedFile);
+            System.out.println("Image saved to: " + outputPath + "\n");
+            
             // Ukuran dalam memori setelah kompresi
-            long compressedFileSize = imageBytes.length;
-            long originalFileSize = originaFile.length(); // ukuran file asli dalam byte
+            long compressedFileSize = compressedFile.length();
+            long originalFileSize = originalFile.length(); // ukuran file asli dalam byte
             long compressionRatio = (long) ((1 - ((double) compressedFileSize / originalFileSize)) * 100);
 
             // Menampilkan informasi kompresi
@@ -69,19 +66,6 @@ public class QuadTreeCompressor {
 
             // Menampilkan gambar terkompresi
             displayImage(compressedImage);
-
-            // Menyimpan gambar terkompresi ke file
-            System.out.println("Save compressed image?");
-            System.out.print(">> ");
-            Scanner scanner = new Scanner(System.in);
-            String saveOption = scanner.nextLine();
-            if (saveOption.equalsIgnoreCase("y") || saveOption.equalsIgnoreCase("yes")) {
-                saveImage(compressedImage, outputPath);
-            } else {
-                System.out.println("Image not saved.");
-            }
-
-            scanner.close();
 
         } catch (IOException e) {
             System.err.println("Error loading the image: " + e.getMessage());
@@ -203,18 +187,6 @@ public class QuadTreeCompressor {
         frame.pack(); 
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-    }
-
-    //Method save image
-    public void saveImage(BufferedImage image, String outputPath) {
-        try {
-            File outputFile = new File(outputPath);
-            ImageIO.write(image, "png", outputFile);
-            System.out.println("Image saved to: " + outputPath);
-        } catch (IOException e) {
-            System.err.println("Error saving the image: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     // Method error Measurement

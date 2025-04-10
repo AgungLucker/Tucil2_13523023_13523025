@@ -66,7 +66,8 @@ public class Main {
                 break;
             }
         } while (true);
-        System.out.println("Enter the target compression ratio:");
+        System.out.println("\nEnter the target compression ratio:");
+        System.out.print(">> ");
         double targetCompression = Double.parseDouble(scanner.nextLine());
         System.out.println();
         System.out.println("Enter the output image path (absolute path):");
