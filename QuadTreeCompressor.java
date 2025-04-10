@@ -98,13 +98,23 @@ public class QuadTreeCompressor {
 
     // Method to display image
     public void displayImage (BufferedImage image){
-        System.out.println("Displayin image...");
-        JFrame frame = new JFrame();
-        JLabel label = new JLabel();
-        frame.setSize(image.getWidth(), image.getHeight());
-        label.setIcon(new ImageIcon(image));
+        System.out.println("Displaying image...");
+        JFrame frame = new JFrame("Image");
+        JLabel label = new JLabel(new ImageIcon(image));
         frame.getContentPane().add(label, BorderLayout.CENTER);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        //Get screen size
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int maxWidth = screenSize.width - 100;
+        int maxHeight = screenSize.height - 100;
+
+        // Adjust frame size if larger than screen
+        int frameWidth = Math.min(image.getWidth(), maxWidth);
+        int frameHeight = Math.min(image.getHeight(), maxHeight);
+
+        frame.setSize(frameWidth, frameHeight);
+        frame.setLocationRelativeTo(null);      
         frame.setVisible(true);
     }
 
