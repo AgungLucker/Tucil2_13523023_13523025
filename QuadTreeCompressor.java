@@ -1,10 +1,12 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-
+import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.time.*;
 
 
 
@@ -29,13 +31,57 @@ public class QuadTreeCompressor {
 
     public void startCompress(){
         try{
+            // Load gambar
             BufferedImage originalImage = ImageIO.read(new File(inputPath));
+            File originaFile = new File(inputPath);
+            System.out.println("Loaded image: " + inputPath);
+            
+            
+            // Kompresi gambar
+            System.out.println("Starting compression...");
             int width = originalImage.getWidth();
             int height = originalImage.getHeight();
-            System.out.println("Starting compression...");
+            long mulai = System.currentTimeMillis();
             Quadrant compressed = compress(originalImage, 0, 0, width, height);
             BufferedImage compressedImage = imageReconstruction(compressed);
+            long selesai = System.currentTimeMillis();
+
+            // Menyimpan ke memori (bukan ke file fisik)
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(compressedImage, "jpg", baos);  // bisa ganti "jpg" ke "png" atau lainnya
+            baos.flush();
+
+            byte[] imageBytes = baos.toByteArray();
+            baos.close();
+
+            // Ukuran dalam memori setelah kompresi
+            long compressedFileSize = imageBytes.length;
+            long originalFileSize = originaFile.length(); // ukuran file asli dalam byte
+            long compressionRatio = (long) ((1 - ((double) compressedFileSize / originalFileSize)) * 100);
+
+            // Menampilkan informasi kompresi
+            System.out.println("Compression completed in " + (selesai - mulai) + " ms");
+            System.out.println("Original image size: " + originalFileSize + " bytes");
+            System.out.println("Compressed image size: " + compressedFileSize + " bytes");
+            System.out.println("Persentase kompresi: " + compressionRatio + "%");
+            System.out.println("Kedalaman pohon");
+            System.out.println("Banyak simpul\n");
+
+            // Menampilkan gambar terkompresi
             displayImage(compressedImage);
+
+            // Menyimpan gambar terkompresi ke file
+            System.out.println("Save compressed image?");
+            System.out.print(">> ");
+            Scanner scanner = new Scanner(System.in);
+            String saveOption = scanner.nextLine();
+            if (saveOption.equalsIgnoreCase("y") || saveOption.equalsIgnoreCase("yes")) {
+                saveImage(compressedImage, outputPath);
+            } else {
+                System.out.println("Image not saved.");
+            }
+
+            scanner.close();
 
         } catch (IOException e) {
             System.err.println("Error loading the image: " + e.getMessage());
@@ -101,6 +147,7 @@ public class QuadTreeCompressor {
         imageReconstructionProcess(root, reconstructedImage);
         return reconstructedImage;
     }
+
     // Method reconstruct gambar hasil compress
     public void imageReconstructionProcess(Quadrant node, BufferedImage reconstructedImage) {
         if(node.isLeaf()){
@@ -157,6 +204,17 @@ public class QuadTreeCompressor {
         frame.setVisible(true);
     }
 
+    //Method save image
+    public void saveImage(BufferedImage image, String outputPath) {
+        try {
+            File outputFile = new File(outputPath);
+            ImageIO.write(image, "png", outputFile);
+            System.out.println("Image saved to: " + outputPath);
+        } catch (IOException e) {
+            System.err.println("Error saving the image: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     // Method error Measurement
     private double ErrorMeasurement(BufferedImage image, int x, int y, int width, int height) {
