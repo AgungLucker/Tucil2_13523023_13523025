@@ -116,27 +116,47 @@ public class QuadTreeCompressor {
         }
     }
 
-    // Method to display image
-    public void displayImage (BufferedImage image){
+    // Method untuk menampilkan gambar
+    public static void displayImage(BufferedImage image) {
         System.out.println("Displaying image...");
-        JFrame frame = new JFrame("Image");
-        JLabel label = new JLabel(new ImageIcon(image));
-        frame.getContentPane().add(label, BorderLayout.CENTER);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        //Get screen size
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int maxWidth = screenSize.width - 100;
         int maxHeight = screenSize.height - 100;
 
-        // Adjust frame size if larger than screen
-        int frameWidth = Math.min(image.getWidth(), maxWidth);
-        int frameHeight = Math.min(image.getHeight(), maxHeight);
+        int imgWidth = image.getWidth();
+        int imgHeight = image.getHeight();
 
-        frame.setSize(frameWidth, frameHeight);
-        frame.setLocationRelativeTo(null);      
+        BufferedImage displayImage = image;
+
+        // Menyesuaikan ukuran gambar jika lebih besar dari layar
+        if (imgWidth > maxWidth || imgHeight > maxHeight) {
+            double widthRatio = (double) maxWidth / imgWidth;
+            double heightRatio = (double) maxHeight / imgHeight;
+            double scale = Math.min(widthRatio, heightRatio);
+
+            int newWidth = (int) (imgWidth * scale);
+            int newHeight = (int) (imgHeight * scale);
+
+            Image scaledImg = image.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+
+            // Konversi scaled image ke BufferedImage
+            displayImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = displayImage.createGraphics();
+            g2d.drawImage(scaledImg, 0, 0, null);
+            g2d.dispose();
+        }
+
+        // Menampilkan gambar
+        JFrame frame = new JFrame("Image Viewer");
+        JLabel label = new JLabel(new ImageIcon(displayImage));
+        frame.getContentPane().add(label, BorderLayout.CENTER);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack(); 
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
+
 
     // Method error Measurement
     private double ErrorMeasurement(BufferedImage image, int x, int y, int width, int height) {
