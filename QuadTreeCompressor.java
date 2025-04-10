@@ -64,8 +64,8 @@ public class QuadTreeCompressor {
             System.out.println("Original image size: " + originalFileSize + " bytes");
             System.out.println("Compressed image size: " + compressedFileSize + " bytes");
             System.out.println("Persentase kompresi: " + compressionRatio + "%");
-            System.out.println("Kedalaman pohon");
-            System.out.println("Banyak simpul\n");
+            System.out.println("Kedalaman pohon: " + compressed.getMaxDepth(compressed));
+            System.out.println("Banyak simpul: " + compressed.getNodesCount(compressed));
 
             // Menampilkan gambar terkompresi
             displayImage(compressedImage);
@@ -128,14 +128,15 @@ public class QuadTreeCompressor {
             }
         }
 
-        int halfWidth = width / 2;
-        int halfHeight = height / 2;
-
+        int w1 = width / 2;
+        int w2 = width - w1;
+        int h1 = height / 2;
+        int h2 = height - h1;
         Quadrant[] children = new Quadrant[4];
-        children[0] = compress(image, x, y, halfWidth, halfHeight); // Top-left
-        children[1] = compress(image, x + halfWidth, y, halfWidth, halfHeight); // Top-right
-        children[2] = compress(image, x, y + halfHeight, halfWidth, halfHeight); // Bottom-left
-        children[3] = compress(image, x + halfWidth, y + halfHeight, halfWidth, halfHeight); // Bottom-right
+        children[0] = compress(image, x, y, w1, h1);                 
+        children[1] = compress(image, x + w1, y, w2, h1);            
+        children[2] = compress(image, x, y + h1, w1, h2);            
+        children[3] = compress(image, x + w1, y + h1, w2, h2);       
 
         Quadrant parent = new Quadrant(x, y, width, height);
         parent.setChildren(children);

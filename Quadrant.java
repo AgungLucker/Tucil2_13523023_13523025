@@ -20,6 +20,26 @@ public class Quadrant {
     public int getY() { return y; }
     public int getWidth() { return width; }
     public int getHeight() { return height; }
+    public int getNodesCount(Quadrant node) {
+        if (node.isLeaf) return 1; 
+        int count = 1; // Count this node
+        if (node.getChildren() != null) {
+            for (Quadrant child : node.getChildren()) {
+                count += getNodesCount(child); // Count children nodes recursively
+            }
+        }
+        return count;
+    }
+    public int getMaxDepth(Quadrant node) {
+        if (node.isLeaf) return 1; 
+        int maxDepth = 0;
+        if (node.getChildren() != null) {
+            for (Quadrant child : node.getChildren()) {
+                maxDepth = Math.max(maxDepth, getMaxDepth(child)); 
+            }
+        }
+        return maxDepth + 1; 
+    }
     public Color getColor() { return color; }
     public Quadrant[] getChildren() { return children; }
     public boolean isLeaf() { return isLeaf; }
