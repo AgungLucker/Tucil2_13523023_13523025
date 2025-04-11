@@ -115,7 +115,6 @@ public class QuadTreeCompressor {
         }
 
         double error = ErrorMeasurement(image, x, y, width, height);
-        // System.out.printf("Error: %.2f, Threshold: %.2f\n", error, threshold);
         if (error < threshold) {
             Quadrant leaf = new Quadrant(x, y, width, height);
             leaf.setColor(averageColor(image, x, y, width, height));
