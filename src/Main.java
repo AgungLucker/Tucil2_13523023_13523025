@@ -70,10 +70,14 @@ public class Main {
         System.out.println("Enter the output image path (absolute path):");
         System.out.print(">> ");
         String outputPath = scanner.nextLine();
+        System.out.println();
+        System.out.println("Enter the output GIF path (absolute path):");
+        System.out.print(">> ");
+        String GIFPath = scanner.nextLine();
 
 
 
-        QuadTreeCompressor compressor = new QuadTreeCompressor(inputPath, errorMethod, threshold, minBlockSize, outputPath);
+        QuadTreeCompressor compressor = new QuadTreeCompressor(inputPath, errorMethod, threshold, minBlockSize, outputPath, GIFPath);
         compressor.startCompress(); 
         scanner.close();
     }

@@ -1,3 +1,4 @@
+import com.madgag.gif.fmsware.AnimatedGifEncoder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -17,14 +18,16 @@ public class QuadTreeCompressor {
     private double threshold;
     private int minBlockSize;
     private String outputPath;
+    private String GIFPath;
 
     public QuadTreeCompressor(String inputPath, int errorMethod, double threshold, 
-                            int minBlockSize, String outputPath) {
+                            int minBlockSize, String outputPath, String GIFPath) {
         this.inputPath = inputPath;
         this.errorMethod = errorMethod;
         this.threshold = threshold;
         this.minBlockSize = minBlockSize;
         this.outputPath = outputPath;
+        this.GIFPath = GIFPath;
     }
 
     public void startCompress(){
@@ -45,7 +48,7 @@ public class QuadTreeCompressor {
             long selesai = System.currentTimeMillis();
 
             // Menyimpan ke memori (bukan ke file fisik)
-            
+
             File compressedFile = new File(outputPath);
             Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
             if (!writers.hasNext()) {
@@ -63,7 +66,9 @@ public class QuadTreeCompressor {
                 writer.dispose();
             }
             System.out.println("Image saved to: " + outputPath + "\n");
-
+            
+            generateGIF(compressed, originalImage.getWidth(), originalImage.getHeight(), GIFPath);
+            System.out.println("GIF saved to: " + GIFPath);
             
             // Ukuran dalam memori setelah kompresi
             long compressedFileSize = compressedFile.length();
@@ -80,6 +85,8 @@ public class QuadTreeCompressor {
 
             // Menampilkan gambar terkompresi
             displayImage(compressedImage);
+            
+            
 
         } catch (IOException e) {
             System.err.println("Error loading the image: " + e.getMessage());
@@ -126,6 +133,9 @@ public class QuadTreeCompressor {
         Quadrant parent = new Quadrant(x, y, width, height);
         parent.setChildren(children);
         parent.setLeaf(false);
+
+        Color parentColor = averageColorFromChildren(parent); //Set warna buat node yang bukan leaf
+        parent.setColor(parentColor);
         return parent;
     }
     public BufferedImage imageReconstruction(Quadrant root) {
@@ -190,6 +200,53 @@ public class QuadTreeCompressor {
         frame.setVisible(true);
     }
 
+    private void generateGIF(Quadrant root, int width, int height, String GIFpath) {
+        try {
+            AnimatedGifEncoder encoder = new AnimatedGifEncoder();
+            encoder.setRepeat(0);
+            encoder.setDelay(500); 
+            encoder.start(GIFpath);
+
+            int maxDepth = root.getMaxDepth(root);
+            for (int i = 0; i <= maxDepth; i++) {  //buat frame
+                BufferedImage frame = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                drawFrame(root, frame, i);
+                encoder.addFrame(frame);
+            }
+
+            BufferedImage finalFrame = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            imageReconstructionProcess(root, finalFrame);
+            encoder.addFrame(finalFrame);
+
+            encoder.finish();
+        } catch (Exception e) {
+            System.err.println("Error generating GIF: " + e.getMessage());
+        }
+
+    }
+
+    private void drawFrame(Quadrant node, BufferedImage frame, int targetDepth) {
+        drawFrameRecursive(node, frame, targetDepth, 0);
+    }
+
+    private void drawFrameRecursive(Quadrant node, BufferedImage frame, int targetDepth, int currentDepth) {
+        if (node == null) return;
+
+        if (node.isLeaf() || currentDepth == targetDepth) {
+            for (int i = node.getY(); i < node.getY() + node.getHeight(); i++) {
+                for (int j = node.getX(); j < node.getX() + node.getWidth(); j++) {
+                    frame.setRGB(j, i, node.getColor().getRGB());
+                }
+            }
+        } else {
+            for (Quadrant child : node.getChildren()) {
+                drawFrameRecursive(child, frame, targetDepth, currentDepth + 1);
+            }
+        }
+        
+    }
+    
+    
     // Method error Measurement
     private double ErrorMeasurement(BufferedImage image, int x, int y, int width, int height) {
         return switch(this.errorMethod) {
@@ -197,7 +254,7 @@ public class QuadTreeCompressor {
             case 1 -> MADMeasurement(image, x, y, width, height);
             case 2 -> maxPixelDifferenceMeasurement(image, x, y, width, height);
             case 3 -> entropyMeasurement(image, x, y, width, height);
-            default -> throw new IllegalArgumentException("Opsi Metode perhitungan error tidak valid: " + this.errorMethod);
+            default -> throw new IllegalArgumentException("Error measurement method invalid: " + this.errorMethod);
         };
     }
 
@@ -320,4 +377,25 @@ public class QuadTreeCompressor {
         }
         return new Color((int)(r / pixelCount), (int)(g / pixelCount), (int)(b / pixelCount));
     }
+ 
+    private Color averageColorFromChildren(Quadrant node) { 
+        if (node.getChildren() == null || node.getChildren().length != 4) {
+            throw new IllegalArgumentException("Node does not have 4 children");
+        }
+    
+        long r = 0, g = 0, b = 0;
+        for (Quadrant child : node.getChildren()) {
+            Color c = child.getColor(); 
+            r += c.getRed();
+            g += c.getGreen();
+            b += c.getBlue();
+        }
+    
+        int avgR = (int)(r / 4);
+        int avgG = (int)(g / 4);
+        int avgB = (int)(b / 4);
+    
+        return new Color(avgR, avgG, avgB);
+    }
+    
 }
