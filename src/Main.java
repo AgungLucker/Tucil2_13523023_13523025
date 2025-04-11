@@ -16,11 +16,10 @@ public class Main {
             System.out.println("1 Mean Absolute Deviation");
             System.out.println("2 Max Pixel Difference");
             System.out.println("3 Entropy");
-            System.out.println("4 SSIM");
             System.out.print(">> ");
             errorMethod = Integer.parseInt(scanner.nextLine());
             if (errorMethod < 0 || errorMethod > 4) {
-                System.out.println("Invalid error method. Please enter a number between 0 and 4.");
+                System.out.println("Invalid error method. Please enter a number between 0 and 3.");
                 System.out.println();
             } else {
                 break;
