@@ -38,4 +38,6 @@ Joel Hotlan Haris Siahaan - 13523023
 ## Links
 - Project Homepage:
 (https://github.com/AgungLucker/Tucil2_13523023_13523025)
+- GIF Library Reference:
+(https://github.com/rtyley/animated-gif-lib-for-java)
 
