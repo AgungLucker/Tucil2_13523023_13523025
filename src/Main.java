@@ -4,10 +4,22 @@ public class Main {
     public static void main(String[] args) {
         double threshold;
         int errorMethod, minBlockSize;
+        String inputPath, outputPath, GIFPath;
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter the input image path (absolute path):");
-        System.out.print(">> ");
-        String inputPath = scanner.nextLine();
+        do {
+            System.out.println();
+            System.out.println("Enter the input image path (absolute path):");
+            System.out.print(">> ");
+            inputPath = scanner.nextLine().trim();
+            if (!(inputPath.toLowerCase().endsWith(".png") ||
+            inputPath.toLowerCase().endsWith(".jpg") ||
+            inputPath.toLowerCase().endsWith(".jpeg"))) {
+                System.out.println("Invalid image file. Must end with .jpg, .jpeg, and .png");
+                System.out.println();
+            } else {
+                break;
+            }
+        } while (true);
 
         do {
             System.out.println();
@@ -65,14 +77,34 @@ public class Main {
                 break;
             }
         } while (true);
-        System.out.println();
-        System.out.println("Enter the output image path (absolute path):");
-        System.out.print(">> ");
-        String outputPath = scanner.nextLine();
-        System.out.println();
-        System.out.println("Enter the output GIF path (absolute path):");
-        System.out.print(">> ");
-        String GIFPath = scanner.nextLine();
+
+        do {
+            System.out.println();
+            System.out.println("Enter the output image path (absolute path):");
+            System.out.print(">> ");
+            outputPath = scanner.nextLine().trim();
+            if (!(outputPath.toLowerCase().endsWith(".png") ||
+            outputPath.toLowerCase().endsWith(".jpg") ||
+            outputPath.toLowerCase().endsWith(".jpeg"))) {
+                System.out.println("Invalid image file. Must end with .jpg, .jpeg, and .png");
+                System.out.println();
+            } else {
+                break;
+            }
+        } while (true);
+
+        do {
+            System.out.println();
+            System.out.println("Enter the output GIF path (absolute path):");
+            System.out.print(">> ");
+            GIFPath = scanner.nextLine().trim();
+            if (!GIFPath.toLowerCase().endsWith(".gif")) {
+                System.out.println("Invalid GIF file. Must end with .gif");
+                System.out.println();
+            } else {
+                break;
+            }
+        } while (true);
 
 
 
