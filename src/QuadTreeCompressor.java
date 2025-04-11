@@ -2,7 +2,12 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.*;
 
 
@@ -40,9 +45,25 @@ public class QuadTreeCompressor {
             long selesai = System.currentTimeMillis();
 
             // Menyimpan ke memori (bukan ke file fisik)
+            
             File compressedFile = new File(outputPath);
-            ImageIO.write(compressedImage, "png", compressedFile);
+            Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+            if (!writers.hasNext()) {
+                throw new IllegalStateException("No writers found for JPEG format.");
+            }
+            ImageWriter writer = writers.next();
+
+            ImageWriteParam param = writer.getDefaultWriteParam();
+            param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            param.setCompressionQuality(0.5f); 
+
+            try (FileImageOutputStream output = new FileImageOutputStream(compressedFile)) {
+                writer.setOutput(output);
+                writer.write(null, new IIOImage(compressedImage, null, null), param);
+                writer.dispose();
+            }
             System.out.println("Image saved to: " + outputPath + "\n");
+
             
             // Ukuran dalam memori setelah kompresi
             long compressedFileSize = compressedFile.length();
@@ -68,7 +89,18 @@ public class QuadTreeCompressor {
 
     // Method compress
     private Quadrant compress(BufferedImage image, int x, int y, int width, int height) {
-        if (width * height < minBlockSize) {
+        int w1 = width / 2;
+        int w2 = width - w1;
+        int h1 = height / 2;
+        int h2 = height - h1;
+        int totalPixel = width * height;
+        int totalSubPixel1 = w1 * h1;
+        int totalSubPixel2 = w2 * h1;
+        int totalSubPixel3 = w1 * h2;
+        int totalSubPixel4 = w2 * h2;
+        if ((totalPixel >= minBlockSize && (totalSubPixel1 < minBlockSize && 
+        totalSubPixel2 < minBlockSize && totalSubPixel3 < minBlockSize && 
+        totalSubPixel4 < minBlockSize) || totalPixel <= minBlockSize)) {
             Quadrant leaf = new Quadrant(x, y, width, height);
             leaf.setColor(averageColor(image, x, y, width, height));
             leaf.setLeaf(true);
@@ -76,6 +108,7 @@ public class QuadTreeCompressor {
         }
 
         double error = ErrorMeasurement(image, x, y, width, height);
+        // System.out.printf("Error: %.2f, Threshold: %.2f\n", error, threshold);
         if (error < threshold) {
             Quadrant leaf = new Quadrant(x, y, width, height);
             leaf.setColor(averageColor(image, x, y, width, height));
@@ -84,10 +117,6 @@ public class QuadTreeCompressor {
         }
 
         // Rekursi dengan bagi gambar menjadi 4 kuadran
-        int w1 = width / 2;
-        int w2 = width - w1;
-        int h1 = height / 2;
-        int h2 = height - h1;
         Quadrant[] children = new Quadrant[4];
         children[0] = compress(image, x, y, w1, h1);                 
         children[1] = compress(image, x + w1, y, w2, h1);            
@@ -145,7 +174,7 @@ public class QuadTreeCompressor {
             Image scaledImg = image.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
 
             // Konversi scaled image ke BufferedImage
-            displayImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+            displayImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
             Graphics2D g2d = displayImage.createGraphics();
             g2d.drawImage(scaledImg, 0, 0, null);
             g2d.dispose();
