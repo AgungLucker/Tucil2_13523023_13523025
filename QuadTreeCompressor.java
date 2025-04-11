@@ -1,14 +1,9 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.time.*;
-
-
 
 
 public class QuadTreeCompressor {
@@ -16,16 +11,14 @@ public class QuadTreeCompressor {
     private int errorMethod;
     private double threshold;
     private int minBlockSize;
-    private double targetCompression;
     private String outputPath;
 
     public QuadTreeCompressor(String inputPath, int errorMethod, double threshold, 
-                            int minBlockSize, double targetCompression, String outputPath) {
+                            int minBlockSize, String outputPath) {
         this.inputPath = inputPath;
         this.errorMethod = errorMethod;
         this.threshold = threshold;
         this.minBlockSize = minBlockSize;
-        this.targetCompression = targetCompression;
         this.outputPath = outputPath;
     }
 
@@ -75,43 +68,22 @@ public class QuadTreeCompressor {
 
     // Method compress
     private Quadrant compress(BufferedImage image, int x, int y, int width, int height) {
-        if (width <= minBlockSize || height <= minBlockSize) {
+        if (width * height <= minBlockSize) {
             Quadrant leaf = new Quadrant(x, y, width, height);
             leaf.setColor(averageColor(image, x, y, width, height));
             leaf.setLeaf(true);
             return leaf;
         }
-        if (errorMethod == 4) {
-            BufferedImage normalizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            Color avgColor = averageColor(image, x, y, width, height);
-            int rgb = avgColor.getRGB(); 
-            for (int i = 0; i < height; i++) {
-                for (int j = 0; j < width; j++) {
-                    normalizedImage.setRGB(j, i, rgb);
-                }
-            }
-            double ssim = SSIMMeasurement(image, normalizedImage, x, y, width, height);
-            if (ssim >= threshold) {
-                Quadrant leaf = new Quadrant(x, y, width, height);
-                leaf.setColor(averageColor(image, x, y, width, height));
-                leaf.setLeaf(true);
-                System.out.printf("SSIM @ (%d,%d,%d,%d): %.4f\n", x, y, width, height, ssim);
 
-                return leaf;
-            }
-            // ssim < threshold maka bagi 
-            System.out.printf("DIV SSIM @4 (%d,%d,%d,%d): %.4f\n", x, y, width, height, ssim);
-
-        } else {
-            double error = ErrorMeasurement(image, x, y, width, height);
-            if (error < threshold) {
-                Quadrant leaf = new Quadrant(x, y, width, height);
-                leaf.setColor(averageColor(image, x, y, width, height));
-                leaf.setLeaf(true);
-                return leaf;
-            }
+        double error = ErrorMeasurement(image, x, y, width, height);
+        if (error < threshold) {
+            Quadrant leaf = new Quadrant(x, y, width, height);
+            leaf.setColor(averageColor(image, x, y, width, height));
+            leaf.setLeaf(true);
+            return leaf;
         }
 
+        // Rekursi dengan bagi gambar menjadi 4 kuadran
         int w1 = width / 2;
         int w2 = width - w1;
         int h1 = height / 2;
@@ -304,69 +276,6 @@ public class QuadTreeCompressor {
             }
         }
         return channelEntropy;
-    }
-
-    private double SSIMMeasurement(BufferedImage image, BufferedImage normalizedImage, int x, int y, int width, int height) {
-        double SSIMr = 0.0, SSIMg = 0.0, SSIMb = 0.0;
-        SSIMr = calculateSSIM(image, normalizedImage, x, y, width, height, 'R');
-        SSIMg = calculateSSIM(image, normalizedImage, x, y, width, height, 'G');
-        SSIMb = calculateSSIM(image, normalizedImage, x, y, width, height, 'B');
-        return (SSIMr * 0.299 + SSIMg * 0.587 + SSIMb * 0.114);
-    }
-
-    private double calculateSSIM(BufferedImage image, BufferedImage normalizedImage, int x, int y, int width, int height, char channel) {
-        double varianceImage = 0;
-        double varianceNormalizedImage = 0;
-        double covariance = 0;
-        Color avgColorImage = averageColor(image, x, y, width, height);
-
-        Color avgColorNormalizedImage = averageColor(normalizedImage, x, y, width, height);
-        if (channel == 'R') {
-            varianceImage = calculateVariance(image, x, y, width, height, 'R');
-            varianceNormalizedImage = calculateVariance(normalizedImage, x, y, width, height, 'R');
-            covariance = calculateCovariance(image, normalizedImage, x, y, width, height, 'R');
-            return ((2 * avgColorImage.getRed() * avgColorNormalizedImage.getRed() + 6.5025) *(2 * covariance + 58.5225)) /
-            ((avgColorImage.getRed() * avgColorImage.getRed() + avgColorNormalizedImage.getRed() * avgColorNormalizedImage.getRed() + 6.5025) *
-            (varianceImage + varianceNormalizedImage + 58.5225));
-
-        } else if (channel == 'G') {
-            varianceImage = calculateVariance(image, x, y, width, height, 'G');
-            varianceNormalizedImage = calculateVariance(normalizedImage, x, y, width, height, 'G');
-            covariance = calculateCovariance(image, normalizedImage, x, y, width, height, 'G');
-            return ((2 * avgColorImage.getGreen() * avgColorNormalizedImage.getGreen() + 6.5025) * (2 * covariance + 58.5225))/ 
-            ((avgColorImage.getGreen() * avgColorImage.getGreen() + avgColorNormalizedImage.getGreen() * avgColorNormalizedImage.getGreen() + 6.5025) * 
-            (varianceImage + varianceNormalizedImage + 58.5225));
-        } else if (channel == 'B') {
-            varianceImage = calculateVariance(image, x, y, width, height, 'B');
-            varianceNormalizedImage = calculateVariance(normalizedImage, x, y, width, height, 'B');
-            covariance = calculateCovariance(image, normalizedImage, x, y, width, height, 'B');
-            return ((2 * avgColorImage.getBlue() * avgColorNormalizedImage.getBlue() + 6.5025) * (2 * covariance + 58.5225))/ 
-            ((avgColorImage.getBlue() * avgColorImage.getBlue() + avgColorNormalizedImage.getBlue() * avgColorNormalizedImage.getBlue() + 6.5025) * 
-            (varianceImage + varianceNormalizedImage + 58.5225));
-        } else {
-            return 0.0; // Invalid channel
-        }
-    }
-
-    private double calculateCovariance(BufferedImage image, BufferedImage normalizedImage, int x, int y, int width, int height, char channel) {
-        double covariance = 0.0;
-        Color avgColorImage = averageColor(image, x, y, width, height);
-        Color avgColorNormalizedImage = averageColor(normalizedImage, x, y, width, height);
-
-        for (int i = y; i < y + height; i++) {
-            for (int j = x; j < x + width; j++) {
-                Color pixelColor = new Color(image.getRGB(j, i));
-                Color normalizedPixelColor = new Color(normalizedImage.getRGB(j, i));
-                if (channel == 'R') {
-                    covariance += (pixelColor.getRed() - avgColorImage.getRed()) * (normalizedPixelColor.getRed() - avgColorNormalizedImage.getRed());
-                } else if (channel == 'G') {
-                    covariance += (pixelColor.getGreen() - avgColorImage.getGreen()) * (normalizedPixelColor.getGreen() - avgColorNormalizedImage.getGreen());
-                } else if (channel == 'B') {
-                    covariance += (pixelColor.getBlue() - avgColorImage.getBlue()) * (normalizedPixelColor.getBlue() - avgColorNormalizedImage.getBlue());
-                }
-            }
-        }
-        return covariance / (width * height);
     }
 
     private Color averageColor(BufferedImage image, int x, int y, int width, int height) {

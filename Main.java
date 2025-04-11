@@ -66,9 +66,6 @@ public class Main {
                 break;
             }
         } while (true);
-        System.out.println("\nEnter the target compression ratio:");
-        System.out.print(">> ");
-        double targetCompression = Double.parseDouble(scanner.nextLine());
         System.out.println();
         System.out.println("Enter the output image path (absolute path):");
         System.out.print(">> ");
@@ -76,7 +73,7 @@ public class Main {
 
 
 
-        QuadTreeCompressor compressor = new QuadTreeCompressor(inputPath, errorMethod, threshold, minBlockSize, targetCompression, outputPath);
+        QuadTreeCompressor compressor = new QuadTreeCompressor(inputPath, errorMethod, threshold, minBlockSize, outputPath);
         compressor.startCompress(); 
         scanner.close();
     }
