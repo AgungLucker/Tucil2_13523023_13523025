@@ -68,7 +68,7 @@ public class QuadTreeCompressor {
 
     // Method compress
     private Quadrant compress(BufferedImage image, int x, int y, int width, int height) {
-        if (width * height <= minBlockSize) {
+        if (width * height < minBlockSize) {
             Quadrant leaf = new Quadrant(x, y, width, height);
             leaf.setColor(averageColor(image, x, y, width, height));
             leaf.setLeaf(true);

@@ -22,10 +22,10 @@ public class Quadrant {
     public int getHeight() { return height; }
     public int getNodesCount(Quadrant node) {
         if (node.isLeaf) return 1; 
-        int count = 1; // Count this node
+        int count = 1; 
         if (node.getChildren() != null) {
             for (Quadrant child : node.getChildren()) {
-                count += getNodesCount(child); // Count children nodes recursively
+                count += getNodesCount(child); 
             }
         }
         return count;
