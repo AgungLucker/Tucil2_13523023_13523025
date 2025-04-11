@@ -14,6 +14,7 @@ Joel Hotlan Haris Siahaan - 13523023
 ## Features
 * Kompresi gambar dengan Quadtree
 * Pilihan Metode pengukuran error dalam kompresi
+* Hasil kompresi disimpan dalam file gambar (.jpg) dan GIF
 
 
 ## How to Run
